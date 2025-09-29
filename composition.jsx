@@ -1,18 +1,10 @@
 import { jsxDEV } from "react/jsx-dev-runtime";
 import React from "react";
-import {
-  AbsoluteFill,
-  Audio,
-  Img,
-  useVideoConfig,
-  useCurrentFrame,
-  delayRender,
-  continueRender
-} from "remotion";
+import * as Remotion from "remotion";
 const DialogueComposition = ({ baseFrameUrl, talkingFrameUrl, audioUrl, audioDurationSeconds }) => {
-  const frame = useCurrentFrame();
-  const { fps } = useVideoConfig();
-  const renderHandle = React.useRef(delayRender());
+  const frame = Remotion.useCurrentFrame();
+  const { fps } = Remotion.useVideoConfig();
+  const renderHandle = React.useRef(Remotion.delayRender());
   const [assetsLoaded, setAssetsLoaded] = React.useState(false);
   React.useEffect(() => {
     let loadedCount = 0;
@@ -21,7 +13,7 @@ const DialogueComposition = ({ baseFrameUrl, talkingFrameUrl, audioUrl, audioDur
       loadedCount++;
       if (loadedCount === totalAssets) {
         setAssetsLoaded(true);
-        continueRender(renderHandle.current);
+        Remotion.continueRender(renderHandle.current);
       }
     };
     const img1 = new Image();
@@ -40,18 +32,18 @@ const DialogueComposition = ({ baseFrameUrl, talkingFrameUrl, audioUrl, audioDur
     img2.src = talkingFrameUrl;
   }, [baseFrameUrl, talkingFrameUrl]);
   if (!assetsLoaded) {
-    return /* @__PURE__ */ jsxDEV(AbsoluteFill, { style: { backgroundColor: "#1a1a2e", justifyContent: "center", alignItems: "center", color: "#00ff00", fontSize: 20 }, children: "Loading Assets..." }, void 0, false, {
+    return /* @__PURE__ */ jsxDEV(Remotion.AbsoluteFill, { style: { backgroundColor: "#1a1a2e", justifyContent: "center", alignItems: "center", color: "#00ff00", fontSize: 20 }, children: "Loading Assets..." }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 45,
+      lineNumber: 37,
       columnNumber: 16
     });
   }
   const frameSwitchRate = 4;
   const isTalkingFrame = Math.floor(frame / frameSwitchRate) % 2 === 1;
   const currentFrameUrl = isTalkingFrame ? talkingFrameUrl : baseFrameUrl;
-  return /* @__PURE__ */ jsxDEV(AbsoluteFill, { children: [
+  return /* @__PURE__ */ jsxDEV(Remotion.AbsoluteFill, { children: [
     /* @__PURE__ */ jsxDEV(
-      Img,
+      Remotion.Img,
       {
         src: currentFrameUrl,
         style: {
@@ -68,18 +60,18 @@ const DialogueComposition = ({ baseFrameUrl, talkingFrameUrl, audioUrl, audioDur
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 62,
+        lineNumber: 54,
         columnNumber: 13
       }
     ),
-    /* @__PURE__ */ jsxDEV(Audio, { src: audioUrl }, void 0, false, {
+    /* @__PURE__ */ jsxDEV(Remotion.Audio, { src: audioUrl }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 75,
+      lineNumber: 67,
       columnNumber: 13
     })
   ] }, void 0, true, {
     fileName: "<stdin>",
-    lineNumber: 60,
+    lineNumber: 52,
     columnNumber: 9
   });
 };
