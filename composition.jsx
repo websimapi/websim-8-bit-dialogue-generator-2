@@ -1,40 +1,53 @@
 import { jsxDEV } from "react/jsx-dev-runtime";
 import React from "react";
 import * as Remotion from "remotion";
+const loadImagePromise = (url) => new Promise((resolve, reject) => {
+  if (!url) {
+    return reject(new Error("Image URL is null/empty"));
+  }
+  const img = new Image();
+  img.crossOrigin = "anonymous";
+  img.onload = () => resolve(img);
+  img.onerror = (e) => {
+    console.error("Image loading failed:", e, url);
+    resolve(null);
+  };
+  img.src = url;
+});
 const DialogueComposition = ({ baseFrameUrl, talkingFrameUrl, audioUrl, audioDurationSeconds }) => {
   const frame = Remotion.useCurrentFrame();
   const { fps } = Remotion.useVideoConfig();
-  const renderHandle = React.useRef(Remotion.delayRender());
+  const handle = Remotion.useMemo(() => Remotion.delayRender(), []);
   const [assetsLoaded, setAssetsLoaded] = React.useState(false);
   React.useEffect(() => {
-    let loadedCount = 0;
-    const totalAssets = 2;
-    const checkLoad = () => {
-      loadedCount++;
-      if (loadedCount === totalAssets) {
-        setAssetsLoaded(true);
-        Remotion.continueRender(renderHandle.current);
+    let isCancelled = false;
+    const loadAssets = async () => {
+      try {
+        await Promise.all([
+          loadImagePromise(baseFrameUrl),
+          loadImagePromise(talkingFrameUrl)
+        ]);
+        if (!isCancelled) {
+          setAssetsLoaded(true);
+          Remotion.continueRender(handle);
+        }
+      } catch (error) {
+        console.error("Critical asset loading error:", error);
+        if (!isCancelled) {
+          setAssetsLoaded(true);
+          Remotion.continueRender(handle);
+        }
       }
     };
-    const img1 = new Image();
-    img1.onload = checkLoad;
-    img1.onerror = () => {
-      console.error("Error loading base frame");
-      checkLoad();
+    loadAssets();
+    return () => {
+      isCancelled = true;
     };
-    img1.src = baseFrameUrl;
-    const img2 = new Image();
-    img2.onload = checkLoad;
-    img2.onerror = () => {
-      console.error("Error loading talking frame");
-      checkLoad();
-    };
-    img2.src = talkingFrameUrl;
-  }, [baseFrameUrl, talkingFrameUrl]);
+  }, [baseFrameUrl, talkingFrameUrl, handle]);
   if (!assetsLoaded) {
     return /* @__PURE__ */ jsxDEV(Remotion.AbsoluteFill, { style: { backgroundColor: "#1a1a2e", justifyContent: "center", alignItems: "center", color: "#00ff00", fontSize: 20 }, children: "Loading Assets..." }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 37,
+      lineNumber: 66,
       columnNumber: 16
     });
   }
@@ -42,7 +55,7 @@ const DialogueComposition = ({ baseFrameUrl, talkingFrameUrl, audioUrl, audioDur
   const isTalkingFrame = Math.floor(frame / frameSwitchRate) % 2 === 1;
   const currentFrameUrl = isTalkingFrame ? talkingFrameUrl : baseFrameUrl;
   return /* @__PURE__ */ jsxDEV(Remotion.AbsoluteFill, { children: [
-    /* @__PURE__ */ jsxDEV(
+    currentFrameUrl && /* @__PURE__ */ jsxDEV(
       Remotion.Img,
       {
         src: currentFrameUrl,
@@ -60,18 +73,18 @@ const DialogueComposition = ({ baseFrameUrl, talkingFrameUrl, audioUrl, audioDur
       false,
       {
         fileName: "<stdin>",
-        lineNumber: 54,
-        columnNumber: 13
+        lineNumber: 84,
+        columnNumber: 17
       }
     ),
-    /* @__PURE__ */ jsxDEV(Remotion.Audio, { src: audioUrl }, void 0, false, {
+    audioUrl && /* @__PURE__ */ jsxDEV(Remotion.Audio, { src: audioUrl }, void 0, false, {
       fileName: "<stdin>",
-      lineNumber: 67,
-      columnNumber: 13
+      lineNumber: 98,
+      columnNumber: 26
     })
   ] }, void 0, true, {
     fileName: "<stdin>",
-    lineNumber: 52,
+    lineNumber: 81,
     columnNumber: 9
   });
 };
