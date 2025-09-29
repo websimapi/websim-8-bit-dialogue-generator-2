@@ -1,6 +1,6 @@
 import { CanvasRenderer } from './CanvasRenderer.js';
 import { FrameGenerator } from './FrameGenerator.js';
-import { VideoClipManager } from './VideoClipManager.js';
+import { VideoClipManager } from './VideoClipManager.jsx';
 import { StorageManager } from './StorageManager.js';
 
 export class AppController {
